@@ -9,9 +9,7 @@ UPLOAD_FOLDER = ''
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
-#app.config["MONGO_URI"] = "mongodb://localhost:27017/grafitisdb"
 app.config['UPLOAD_FOLDER']  = UPLOAD_FOLDER
-#mongo = PyMongo(app)
 
 url_mongo_atlas = "mongodb+srv://grafiti:12345@cluster0.qecwv.mongodb.net/examen?retryWrites=true&w=majority"
 client = pymongo.MongoClient(url_mongo_atlas)
