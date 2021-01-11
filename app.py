@@ -13,9 +13,9 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER']  = UPLOAD_FOLDER
 #mongo = PyMongo(app)
 
-url_mongo_atlas = "mongodb+srv://grafiti:12345@cluster0.qecwv.mongodb.net/grafitidb?retryWrites=true&w=majority"
+url_mongo_atlas = "mongodb+srv://grafiti:12345@cluster0.qecwv.mongodb.net/examen?retryWrites=true&w=majority"
 client = pymongo.MongoClient(url_mongo_atlas)
-mongo = client.get_database('grafitis')
+mongo = client.get_database('examen')
 
 ########################  Usuario  ########################
 
