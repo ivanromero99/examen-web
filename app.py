@@ -11,6 +11,7 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER']  = UPLOAD_FOLDER
 
+#El usuario de Atlas se llama grafiti ya que es el mismo que usé en el proyecto
 url_mongo_atlas = "mongodb+srv://grafiti:12345@cluster0.qecwv.mongodb.net/examen?retryWrites=true&w=majority"
 client = pymongo.MongoClient(url_mongo_atlas)
 mongo = client.get_database('examen')
@@ -107,108 +108,6 @@ def login(email, nombre):
 
 
 
-
-########################  Grafiti  ########################
-
-@app.route('/grafitis', methods=['GET'])
-def get_grafitis():
-    grafitis = mongo.db.grafitis.find()
-    response = json_util.dumps(grafitis)
-    return Response(response, mimetype='application/json')
-
-@app.route('/grafitis/<id>', methods=['GET'])
-def get_grafiti(id):
-    grafiti = mongo.db.grafitis.find_one({'_id': ObjectId(id)})
-    response = json_util.dumps(grafiti)
-    return Response(response, mimetype='application/json')
-
-@app.route('/grafitis/<id>', methods=['DELETE'])
-def delete_grafiti(id):
-    mongo.db.grafitis.delete_one({'_id': ObjectId(id)})
-    response = {'mensaje': 'Grafiti eliminado correctamente'}
-    return response
-
-@app.route('/grafitis/<id>', methods=['PUT'])
-def update_grafiti(id):
-    nombre = request.json['nombre']
-    fecha = request.json['fecha']
-    url = request.json['url']
-    autor = request.json['autor']
-    direccion = request.json['direccion']
-    x = request.json['x']
-    y = request.json['y']
-    usuario_email = request.json['usuario_email']
-
-    if nombre and direccion and fecha and url and autor and x and y:
-        mongo.db.grafitis.update_one({'_id': ObjectId(id)}, {'$set': {
-            'nombre': nombre, 
-            'url': url, 
-            'autor': autor,
-            'fecha': fecha,
-            'x': x,
-            'y': y,
-            'direccion': direccion,
-            'usuario_email': usuario_email
-        }})
-        response = jsonify({'mensaje': 'Grafiti actualizado correctamente'})
-        return response
-    else: 
-        return not_found()
-
-@app.route('/grafitis', methods=['POST'])
-def create_grafiti():
-    nombre = request.json['nombre']
-    fecha = request.json['fecha']
-    url = request.json['url']
-    autor = request.json['autor']
-    direccion = request.json['direccion']
-    x = request.json['x']
-    y = request.json['y']
-    usuario_email = request.json['usuario_email']
-
-    if nombre and direccion and fecha and url and autor and x and y and usuario_email:
-        id = mongo.db.grafitis.insert({
-                'nombre': nombre,
-                'fecha': fecha,
-                'url': url,
-                'autor': autor,
-                'x': x,
-                'y': y,
-                'direccion': direccion,
-                'usuario_email': usuario_email
-            }
-        )
-        response = {
-            'id': str(id),
-            'nombre': nombre,
-            'fecha': fecha,
-            'url': url,
-            'autor': autor,
-            'x': x,
-            'y': y,
-            'direccion': direccion,
-            'usuario_email': usuario_email
-        }
-        return response
-    else: 
-        return not_found()
-
-@app.route('/grafitis/findByNombre/<nombre>', methods=['GET'])
-def get_grafiti_byNombre(nombre):
-    myquery = { "nombre": { '$regex': ".*" + nombre + ".*" } }
-    grafiti = mongo.db.grafitis.find(myquery)
-    response = json_util.dumps(grafiti)
-    return Response(response, mimetype='application/json')
-
-@app.route('/grafitis/findByUsuario/<email>', methods=['GET'])
-def get_grafiti_byUsuario(email):
-    myquery = { "usuario_email": email }
-    grafiti = mongo.db.grafitis.find(myquery)
-    response = json_util.dumps(grafiti)
-    return Response(response, mimetype='application/json')
-
-
-
 ########################  Comentario  ########################
 
 @app.route('/comentarios', methods=['GET'])
@@ -294,60 +193,6 @@ def guardar_imagen():
 @app.route('/media/<filename>', methods=['GET'])
 def devolver_imagen(filename):
     return send_file(filename, as_attachment=True)
-
-
-
-
-########################  Quiz  ########################
-
-@app.route('/quiz', methods=['GET'])
-def get_quizs():
-    quizs = mongo.db.quizs.find()
-    response = json_util.dumps(quizs)
-    return Response(response, mimetype='application/json')
-
-@app.route('/quiz/<id>', methods=['GET'])
-def get_quiz(id):
-    quiz = mongo.db.quizs.find_one({'_id': ObjectId(id)})
-    response = json_util.dumps(quiz)
-    return Response(response, mimetype='application/json')
-
-@app.route('/quiz/dificultad/<dif>', methods=['GET'])
-def get_quiz_filtrado(dif):
-    myquery = { "dificultad": { '$regex': ".*" + dif + ".*" } }
-    quizs = mongo.db.quizs.find(myquery)
-    response = json_util.dumps(quizs)
-    return Response(response, mimetype='application/json')
-
-@app.route('/quiz/<id>', methods=['DELETE'])
-def delete_quiz(id):
-    mongo.db.quizs.delete_one({'_id': ObjectId(id)})
-    response = {'mensaje': 'Quiz eliminado correctamente'}
-    return response
-
-@app.route('/quiz', methods=['POST'])
-def create_quiz():
-    nombre = request.json['nombre']
-    pista = request.json['pista']
-    dificultad = request.json['dificultad']
-    direccion = request.json['direccion']
-    foto = request.json['foto']
-
-    if nombre and dificultad and pista and direccion and foto:
-        id = mongo.db.quizs.insert(
-            {'nombre': nombre, 'pista': pista, "dificultad": dificultad, 'direccion': direccion, 'foto': foto}
-        )
-        response = {
-            'id': str(id),
-            'nombre': nombre,
-            'pista': pista,
-            'dificultad': dificultad,
-            'direccion': direccion,
-            'foto': foto
-        }
-        return response
-    else: 
-        return not_found()
 
 
 
