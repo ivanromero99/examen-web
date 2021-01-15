@@ -154,12 +154,25 @@ def update_imagen(id):
         return not_found()
 
 @app.route('/imagenes/filtrar/<filtro>', methods=['GET'])
-def ger_filtro(filtro):
+def get_filtro(filtro):
     myquery = { "descripcion": { '$regex': ".*" + filtro + ".*" } }
     imagen = mongo.db.imagenes.find(myquery)
     response = json_util.dumps(imagen)
     return Response(response, mimetype='application/json')
 
+@app.route('/imagenes/like/<id>', methods=['GET'])
+def dar_like(id):
+    imagen = mongo.db.imagenes.find_one({'_id': ObjectId(id)})
+    numero_likes = int(imagen.likes)
+    nuevo = numero_likes + 1
+    mongo.db.imagenes.update_one({'_id': ObjectId(id)}, {'$set': {
+            'email': imagen.email,
+            'descripcion' : imagen.descripcion,
+            'likes' : str(nuevo),
+            'nombre' : imagen.nombre
+    }})
+    response = json_util.dumps(imagen)
+    return Response(response, mimetype='application/json')
 
 
 
