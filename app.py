@@ -8,6 +8,16 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from flask_cors import CORS
 
+config = {
+    "apiKey": "AIzaSyAAOx479AO6Pd82QmzJ5f5nAGVeIzex4ic",
+    "authDomain": "cloud-imagenes.firebaseapp.com",
+    "projectId": "cloud-imagenes",
+    "storageBucket": "cloud-imagenes.appspot.com",
+    "messagingSenderId": "65945789369",
+    "appId": "1:65945789369:web:2c5f9109c89c9db9690c68",
+    "measurementId": "G-ZSJ5LNV7NB"
+}
+
 UPLOAD_FOLDER = ''
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
@@ -33,59 +43,21 @@ def get_usuario(id):
     response = json_util.dumps(usuario)
     return Response(response, mimetype='application/json')
 
-@app.route('/usuarios/<id>', methods=['DELETE'])
-def delete_usuario(id):
-    mongo.db.usuarios.delete_one({'_id': ObjectId(id)})
-    response = {'mensaje': 'Usuario eliminado correctamente'}
-    return response
-
-@app.route('/usuarios/<id>', methods=['PUT'])
-def update_usuario(id):
-    nombre = request.json['nombre']
-    direccion = request.json['direccion']
-    password = request.json['password']
-    email = request.json['email']
-
-    if nombre and direccion and password and email:
-        mongo.db.usuarios.update_one({'_id': ObjectId(id)}, {'$set': {
-            'nombre': nombre, 
-            'email': email, 
-            'password': password,
-            'direccion': direccion
-        }})
-        response = jsonify({'mensaje': 'Usuario actualizado correctamente'})
-        return response
-    else: 
-        return not_found()
-
 @app.route('/usuarios', methods=['POST'])
 def create_usuario():
-    nombre = request.json['nombre']
-    password = request.json['password']
     email = request.json['email']
-    direccion = request.json['direccion']
 
-    if nombre and password and email and direccion:
+    if email:
         id = mongo.db.usuarios.insert(
-            {'nombre': nombre, 'email': email, "password": password, 'direccion': direccion}
+            {'email': email}
         )
         response = {
             'id': str(id),
-            'nombre': nombre,
-            'email': email,
-            'password': password,
-            'direccion': direccion
+            'email': email
         }
         return response
     else: 
         return not_found()
-
-@app.route('/usuarios/findByNombre/<nombre>', methods=['GET'])
-def get_usuario_byNombre(nombre):
-    myquery = { "nombre": { '$regex': ".*" + nombre + ".*" } }
-    usuario = mongo.db.usuarios.find(myquery)
-    response = json_util.dumps(usuario)
-    return Response(response, mimetype='application/json')
 
 @app.route('/usuarios/findByEmail/<email>', methods=['GET'])
 def get_usuario_byEmail(email):
@@ -108,7 +80,7 @@ def login(email, nombre, token):
     usuario = mongo.db.usuarios.find_one(myquery)
     if not usuario:
         mongo.db.usuarios.insert(
-            {'nombre': nombre, 'email': email, 'password': 'Desconocida', 'direccion': 'Desconocida'}
+            {'email': email}
         )
     else:
         response = json_util.dumps(usuario)
@@ -120,170 +92,70 @@ def login(email, nombre, token):
 
 
 
-########################  Grafiti  ########################
+########################  Imagen  ########################
 
-@app.route('/grafitis', methods=['GET'])
-def get_grafitis():
-    grafitis = mongo.db.grafitis.find()
-    response = json_util.dumps(grafitis)
+@app.route('/imagenes', methods=['GET'])
+def get_imagenes():
+    imagenes = mongo.db.imagenes.find()
+    response = json_util.dumps(imagenes)
     return Response(response, mimetype='application/json')
 
-@app.route('/grafitis/<id>', methods=['GET'])
-def get_grafiti(id):
-    grafiti = mongo.db.grafitis.find_one({'_id': ObjectId(id)})
-    response = json_util.dumps(grafiti)
+@app.route('/imagenes/<id>', methods=['GET'])
+def get_imagen(id):
+    imagen = mongo.db.imagenes.find_one({'_id': ObjectId(id)})
+    response = json_util.dumps(imagen)
     return Response(response, mimetype='application/json')
 
-@app.route('/grafitis/<id>', methods=['DELETE'])
-def delete_grafiti(id):
-    mongo.db.grafitis.delete_one({'_id': ObjectId(id)})
-    response = {'mensaje': 'Grafiti eliminado correctamente'}
-    return response
+@app.route('/imagenes', methods=['POST'])
+def create_imagen():
+    email = request.json['email']
+    likes = request.json['likes']
+    descripcion = request.json['descripcion']
 
-@app.route('/grafitis/<id>', methods=['PUT'])
-def update_grafiti(id):
-    nombre = request.json['nombre']
-    fecha = request.json['fecha']
-    url = request.json['url']
-    autor = request.json['autor']
-    direccion = request.json['direccion']
-    x = request.json['x']
-    y = request.json['y']
-    usuario_email = request.json['usuario_email']
-
-    if nombre and direccion and fecha and url and autor and x and y:
-        mongo.db.grafitis.update_one({'_id': ObjectId(id)}, {'$set': {
-            'nombre': nombre, 
-            'url': url, 
-            'autor': autor,
-            'fecha': fecha,
-            'x': x,
-            'y': y,
-            'direccion': direccion,
-            'usuario_email': usuario_email
-        }})
-        response = jsonify({'mensaje': 'Grafiti actualizado correctamente'})
-        return response
-    else: 
-        return not_found()
-
-@app.route('/grafitis', methods=['POST'])
-def create_grafiti():
-    nombre = request.json['nombre']
-    fecha = request.json['fecha']
-    url = request.json['url']
-    autor = request.json['autor']
-    direccion = request.json['direccion']
-    x = request.json['x']
-    y = request.json['y']
-    usuario_email = request.json['usuario_email']
-
-    if nombre and direccion and fecha and url and autor and x and y and usuario_email:
-        id = mongo.db.grafitis.insert({
-                'nombre': nombre,
-                'fecha': fecha,
-                'url': url,
-                'autor': autor,
-                'x': x,
-                'y': y,
-                'direccion': direccion,
-                'usuario_email': usuario_email
-            }
+    if email:
+        id = mongo.db.imagenes.insert(
+            {'email': email, 'descripcion' : descripcion, 'likes' : likes}
         )
         response = {
             'id': str(id),
-            'nombre': nombre,
-            'fecha': fecha,
-            'url': url,
-            'autor': autor,
-            'x': x,
-            'y': y,
-            'direccion': direccion,
-            'usuario_email': usuario_email
+            'email': email,
+            'descripcion' : descripcion,
+            'likes' : likes
         }
         return response
     else: 
         return not_found()
 
-@app.route('/grafitis/findByNombre/<nombre>', methods=['GET'])
-def get_grafiti_byNombre(nombre):
-    myquery = { "nombre": { '$regex': ".*" + nombre + ".*" } }
-    grafiti = mongo.db.grafitis.find(myquery)
-    response = json_util.dumps(grafiti)
-    return Response(response, mimetype='application/json')
-
-@app.route('/grafitis/findByUsuario/<email>', methods=['GET'])
-def get_grafiti_byUsuario(email):
-    myquery = { "usuario_email": email }
-    grafiti = mongo.db.grafitis.find(myquery)
-    response = json_util.dumps(grafiti)
-    return Response(response, mimetype='application/json')
-
-
-
-########################  Comentario  ########################
-
-@app.route('/comentarios', methods=['GET'])
-def get_comentarios():
-    comentarios = mongo.db.comentarios.find()
-    response = json_util.dumps(comentarios)
-    return Response(response, mimetype='application/json')
-
-@app.route('/comentarios/<id>', methods=['GET'])
-def get_comentario(id):
-    comentario = mongo.db.comentarios.find_one({'_id': ObjectId(id)})
-    response = json_util.dumps(comentario)
-    return Response(response, mimetype='application/json')
-
-@app.route('/comentarios/<id>', methods=['DELETE'])
-def delete_comentario(id):
-    mongo.db.comentarios.delete_one({'_id': ObjectId(id)})
-    response = {'mensaje': 'Comentario eliminado correctamente'}
+@app.route('/imagenes/<id>', methods=['DELETE'])
+def delete_imagen(id):
+    mongo.db.imagenes.delete_one({'_id': ObjectId(id)})
+    response = {'mensaje': 'imagen eliminada correctamente'}
     return response
 
-@app.route('/comentarios/<id>', methods=['PUT'])
-def update_comentario(id):
-    contenido = request.json['contenido']
-    usuario_nombre = request.json['usuario_nombre']
-    grafiti_id = request.json['grafiti_id']
+@app.route('/imagenes/<id>', methods=['PUT'])
+def update_imagen(id):
+    email = request.json['email']
+    likes = request.json['likes']
+    descripcion = request.json['descripcion']
 
-    if contenido and usuario_nombre and grafiti_id:
-        mongo.db.comentarios.update_one({'_id': ObjectId(id)}, {'$set': {
-            'contenido': contenido, 
-            'usuario_nombre': usuario_nombre,
-            'grafiti_id': grafiti_id
+    if descripcion and likes and email:
+        mongo.db.imagenes.update_one({'_id': ObjectId(id)}, {'$set': {
+            'email': email,
+            'descripcion' : descripcion,
+            'likes' : likes
         }})
-        response = jsonify({'mensaje': 'comentario actualizado correctamente'})
+        response = jsonify({'mensaje': 'Imagen actualizado correctamente'})
         return response
     else: 
         return not_found()
 
-@app.route('/comentarios', methods=['POST'])
-def create_comentario():
-    contenido = request.json['contenido']
-    usuario_nombre = request.json['usuario_nombre']
-    grafiti_id = request.json['grafiti_id']
-
-    if contenido and usuario_nombre and grafiti_id:
-        id = mongo.db.comentarios.insert(
-            {'contenido': contenido, 'usuario_nombre': usuario_nombre, "grafiti_id": grafiti_id}
-        )
-        response = {
-            'id': str(id),
-            'contenido': contenido,
-            'usuario_nombre': usuario_nombre,
-            'grafiti_id': grafiti_id
-        }
-        return response
-    else: 
-        return not_found()
-
-@app.route('/comentarios/findByGrafiti/<id>', methods=['GET'])
-def get_comentario_byGrafiti(id):
-    myquery = { "grafiti_id": id }
-    comentario = mongo.db.comentarios.find(myquery)
-    response = json_util.dumps(comentario)
+@app.route('/imagenes/filtrar/<filtro>', methods=['GET'])
+def ger_filtro(filtro):
+    myquery = { "descripcion": { '$regex': ".*" + filtro + ".*" } }
+    imagen = mongo.db.imagenes.find(myquery)
+    response = json_util.dumps(imagen)
     return Response(response, mimetype='application/json')
+
 
 
 
@@ -307,59 +179,6 @@ def guardar_imagen():
 def devolver_imagen(filename):
     return send_file(filename, as_attachment=True)
 
-
-
-
-########################  Quiz  ########################
-
-@app.route('/quiz', methods=['GET'])
-def get_quizs():
-    quizs = mongo.db.quizs.find()
-    response = json_util.dumps(quizs)
-    return Response(response, mimetype='application/json')
-
-@app.route('/quiz/<id>', methods=['GET'])
-def get_quiz(id):
-    quiz = mongo.db.quizs.find_one({'_id': ObjectId(id)})
-    response = json_util.dumps(quiz)
-    return Response(response, mimetype='application/json')
-
-@app.route('/quiz/dificultad/<dif>', methods=['GET'])
-def get_quiz_filtrado(dif):
-    myquery = { "dificultad": { '$regex': ".*" + dif + ".*" } }
-    quizs = mongo.db.quizs.find(myquery)
-    response = json_util.dumps(quizs)
-    return Response(response, mimetype='application/json')
-
-@app.route('/quiz/<id>', methods=['DELETE'])
-def delete_quiz(id):
-    mongo.db.quizs.delete_one({'_id': ObjectId(id)})
-    response = {'mensaje': 'Quiz eliminado correctamente'}
-    return response
-
-@app.route('/quiz', methods=['POST'])
-def create_quiz():
-    nombre = request.json['nombre']
-    pista = request.json['pista']
-    dificultad = request.json['dificultad']
-    direccion = request.json['direccion']
-    foto = request.json['foto']
-
-    if nombre and dificultad and pista and direccion and foto:
-        id = mongo.db.quizs.insert(
-            {'nombre': nombre, 'pista': pista, "dificultad": dificultad, 'direccion': direccion, 'foto': foto}
-        )
-        response = {
-            'id': str(id),
-            'nombre': nombre,
-            'pista': pista,
-            'dificultad': dificultad,
-            'direccion': direccion,
-            'foto': foto
-        }
-        return response
-    else: 
-        return not_found()
 
 
 
