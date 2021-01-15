@@ -174,6 +174,13 @@ def dar_like(id):
     response = json_util.dumps(imagen)
     return Response(response, mimetype='application/json')
 
+@app.route('/imagenes/findByEmail/<email>', methods=['GET'])
+def get_imagenes_byEmail(email):
+    myquery = { "email": email }
+    imagenes = mongo.db.imagenes.find(myquery)
+    response = json_util.dumps(imagenes)
+    return Response(response, mimetype='application/json')
+
 
 
 ########################  Media  ########################
