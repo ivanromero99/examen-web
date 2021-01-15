@@ -111,16 +111,18 @@ def create_imagen():
     email = request.json['email']
     likes = request.json['likes']
     descripcion = request.json['descripcion']
+    nombre = request.json['nombre']
 
     if email:
         id = mongo.db.imagenes.insert(
-            {'email': email, 'descripcion' : descripcion, 'likes' : likes}
+            {'email': email, 'descripcion' : descripcion, 'likes' : likes, 'nombre' : nombre}
         )
         response = {
             'id': str(id),
             'email': email,
             'descripcion' : descripcion,
-            'likes' : likes
+            'likes' : likes,
+            'nombre' : nombre
         }
         return response
     else: 
@@ -137,12 +139,14 @@ def update_imagen(id):
     email = request.json['email']
     likes = request.json['likes']
     descripcion = request.json['descripcion']
+    nombre = request.json['nombre']
 
     if descripcion and likes and email:
         mongo.db.imagenes.update_one({'_id': ObjectId(id)}, {'$set': {
             'email': email,
             'descripcion' : descripcion,
-            'likes' : likes
+            'likes' : likes,
+            'nombre' : nombre
         }})
         response = jsonify({'mensaje': 'Imagen actualizado correctamente'})
         return response
