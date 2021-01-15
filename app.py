@@ -23,7 +23,7 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER']  = UPLOAD_FOLDER
-#CORS(app)
+CORS(app)
 
 url_mongo_atlas = "mongodb+srv://grafiti:12345@cluster0.qecwv.mongodb.net/examendb?retryWrites=true&w=majority"
 client = pymongo.MongoClient(url_mongo_atlas)
